@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reproductor de Música</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 20px;
+        }
+        audio {
+            display: block;
+            margin: 20px auto;
+        }
+        button {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #fileList {
+            list-style: none;
+            padding: 0;
+            margin-top: 20px;
+            max-width: 400px;
+            margin: 20px auto;
+            text-align: left;
+        }
+        #fileList li {
+            padding: 5px;
+            border: 1px solid #ddd;
+            margin-bottom: 5px;
+            cursor: pointer;
+        }
+        #fileList li.active {
+            background-color: #f0f0f0;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Reproductor de Música</h1>
+    <input type="file" id="fileInput" accept="audio/*" multiple>
+    <div id="playerContainer">
+        <audio id="audioPlayer" controls>
+            Your browser does not support the audio element.
+        </audio>
+    </div>
+    <ul id="fileList"></ul>
+    <div>
+        <button id="prevBtn" disabled>Anterior</button>
+        <button id="nextBtn" disabled>Siguiente</button>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const audioPlayer = document.getElementById('audioPlayer');
+        const fileList = document.getElementById('fileList');
+        const prevBtn = document.getElementById('prevBtn');
+        const nextBtn = document.getElementById('nextBtn');
+
+        let playlist = [];
+        let currentIndex = 0;
+
+        // Maneja la selección de archivos
+        fileInput.addEventListener('change', (event) => {
+            playlist = Array.from(event.target.files); // Obtiene los archivos seleccionados
+            if (playlist.length > 0) {
+                currentIndex = 0;
+                loadTrack(currentIndex);
+                prevBtn.disabled = false;
+                nextBtn.disabled = false;
+                displayPlaylist();
+            }
+        });
+
+        // Carga la pista actual
+        function loadTrack(index) {
+            if (playlist[index]) {
+                const fileURL = URL.createObjectURL(playlist[index]);
+                audioPlayer.src = fileURL;
+                audioPlayer.play();
+                highlightActiveTrack(index);
+            }
+        }
+
+        // Muestra la lista de archivos
+        function displayPlaylist() {
+            fileList.innerHTML = ''; // Limpia la lista anterior
+            playlist.forEach((file, index) => {
+                const li = document.createElement('li');
+                li.textContent = file.name;
+                li.addEventListener('click', () => {
+                    currentIndex = index;
+                    loadTrack(index);
+                });
+                fileList.appendChild(li);
+            });
+            highlightActiveTrack(currentIndex);
+        }
+
+        // Resalta la pista activa en la lista
+        function highlightActiveTrack(index) {
+            const items = fileList.querySelectorAll('li');
+            items.forEach((item, i) => {
+                if (i === index) {
+                    item.classList.add('active');
+                } else {
+                    item.classList.remove('active');
+                }
+            });
+        }
+
+        // Botón "Siguiente"
+        nextBtn.addEventListener('click', () => {
+            if (currentIndex < playlist.length - 1) {
+                currentIndex++;
+                loadTrack(currentIndex);
+            }
+        });
+
+        // Botón "Anterior"
+        prevBtn.addEventListener('click', () => {
+            if (currentIndex > 0) {
+                currentIndex--;
+                loadTrack(currentIndex);
+            }
+        });
+    </script>
+</body>
+</html>
